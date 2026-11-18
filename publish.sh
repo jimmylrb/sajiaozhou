@@ -4,6 +4,7 @@ REPO="${1:-git@github.com:jimmylrb/sajiaozhou.git}"
 if ! git ls-remote "$REPO" >/dev/null 2>&1; then
   echo "远程仓库还不存在。先打开下面链接创建空仓库（不要勾选 README）："
   echo "https://github.com/new?name=sajiaozhou&visibility=public"
+  echo "建好后，把 .deploykey/id_ed25519.pub 添加为仓库 Deploy key（勾选 Allow write access），再运行本脚本。"
   exit 1
 fi
 git remote remove origin 2>/dev/null || true
