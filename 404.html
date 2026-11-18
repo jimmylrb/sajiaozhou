@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信号丢失 // BLACKSITE ZERO</title>
+<style>
+  html,body{margin:0;height:100%;background:#05080a;color:#dfe9e6;font-family:"PingFang SC","Microsoft YaHei",sans-serif;display:flex;align-items:center;justify-content:center}
+  .box{text-align:center;padding:40px}
+  .tag{font:10px monospace;letter-spacing:.35em;color:#c8ff4f;margin-bottom:14px}
+  h1{font-size:clamp(44px,9vw,110px);margin:0;letter-spacing:.08em;font-weight:900}
+  p{color:#7d918f;font-size:12px;letter-spacing:.12em;line-height:2}
+  a{color:#c8ff4f;text-decoration:none;border-bottom:1px solid rgba(200,255,79,.4);padding-bottom:2px}
+  .line{width:60px;height:1px;background:#c8ff4f;margin:24px auto}
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="tag">404 // SIGNAL LOST</div>
+    <h1>信号丢失</h1>
+    <div class="line"></div>
+    <p>你偏离了行动区域。<br><a href="./">返回零号禁区</a></p>
+  </div>
+  <script>
+    // GitHub Pages serves this file for missing paths; return to the site root.
+    if (location.pathname.split('/').filter(Boolean).length > 1) {
+      setTimeout(() => { location.replace('./'); }, 1800);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>零号禁区 // BLACKSITE ZERO</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+<div id="damage-flash"></div>
+
+<!-- ============ TITLE ============ -->
+<section id="screen-title" class="screen active">
+  <div class="title-top">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <path d="M20 2 36 11v18L20 38 4 29V11Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M20 8 30 14v12l-10 6-10-6V14Z" fill="none" stroke="currentColor" stroke-width="1"/>
+        <path d="M20 14v12M14 20h12" stroke="currentColor" stroke-width="1"/>
+      </svg>
+      <div><b>BLACKSITE ZERO</b><span>灰区联合指挥部 / 非授权副本</span></div>
+    </div>
+    <div class="title-meta"><span>3D / FPS</span><span>SEASON 00</span><span>BUILD 3.0</span><span class="live-dot">LIVE</span></div>
+  </div>
+
+  <div class="title-wrap">
+    <div class="eyebrow"><span>FIRST-PERSON EXTRACTION</span><i></i><span>灰港 · 07号联合设施</span></div>
+    <h1>零号禁区</h1>
+    <div class="title-en">BLACKSITE <em>ZERO</em></div>
+    <p class="tagline">第一人称 · 立体战场 · 搜刮撤离。<br><span>踏入灰港，带着战利品活着回来。</span></p>
+    <div class="title-cta">
+      <button id="enter-btn" class="btn btn-primary"><span>进入行动准备</span><b>→</b></button>
+      <button id="title-help-btn" class="btn btn-ghost">行动手册</button>
+    </div>
+    <div class="title-pillars">
+      <div><b>01</b><span>第一人称</span><i>第一人称战术射击，弹道、后坐与机瞄</i></div>
+      <div><b>02</b><span>立体港区</span><i>仓库、集装箱场、行政楼与地下金库</i></div>
+      <div><b>03</b><span>带出即赚</span><i>成功撤离，全部战利品折算信用点</i></div>
+    </div>
+  </div>
+
+  <div class="radar-deco" aria-hidden="true">
+    <div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div>
+    <div class="radar-cross"></div><div class="radar-sweep"></div>
+    <div class="radar-blip b1"></div><div class="radar-blip b2"></div><div class="radar-blip b3"></div>
+    <div class="radar-label l1">SECTOR 07</div><div class="radar-label l2">HOSTILES: <b>UNKNOWN</b></div>
+    <div class="radar-label l3">31°14' N / 121°29' E</div>
+  </div>
+
+  <div class="cinema top"></div><div class="cinema bottom"></div>
+  <div class="title-side"><span>OPERATION</span><b>灰港 // 07</b><i>FIRST-PERSON EXTRACTION</i></div>
+  <div class="title-bottom">
+    <div class="controls-line">
+      <span><kbd>WASD</kbd>移动</span><span><kbd>鼠标</kbd>瞄准</span><span><kbd>左键</kbd>射击</span><span><kbd>Shift</kbd>冲刺</span><span><kbd>F</kbd>检视武器</span><span><kbd>E</kbd>搜刮 / 撤离</span>
+    </div>
+    <div class="title-save" id="title-save"></div>
+  </div>
+</section>
+
+<!-- ============ HUB ============ -->
+<section id="screen-hub" class="screen">
+  <header class="hub-head">
+    <div class="brand small">
+      <svg class="brand-mark" viewBox="0 0 40 40"><path d="M20 2 36 11v18L20 38 4 29V11Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M20 8 30 14v12l-10 6-10-6V14Z" fill="none" stroke="currentColor" stroke-width="1"/><path d="M20 14v12M14 20h12" stroke="currentColor" stroke-width="1"/></svg>
+      <div><b>零号禁区</b><span>行动整备 / OPERATIONS</span></div>
+    </div>
+    <div class="resources">
+      <div class="res"><span>信用点</span><b id="res-credits">0</b><em>₡</em></div>
+      <div class="res"><span>累计带出</span><b id="res-stash">0</b><em>₡</em></div>
+      <div class="res"><span>撤离率</span><b id="res-rate">--</b><em>%</em></div>
+    </div>
+    <div class="hub-actions">
+      <button class="icon-btn" id="help-btn"><span>?</span> 行动手册</button>
+      <button class="icon-btn" id="sound-btn"><span>◖</span> 音效 开</button>
+    </div>
+  </header>
+
+  <main class="hub-main">
+    <section class="panel loadout-panel">
+      <div class="panel-head"><span class="idx">01</span><h2>装备配置</h2><span class="en">LOADOUT</span></div>
+      <div class="panel-body">
+        <div class="field-label">主武器 <span>点击切换 / 押金撤离后返还</span><button id="gunsmith-btn" class="mini-btn">枪械改装 ↗</button></div>
+        <div id="weapon-list" class="weapon-grid"></div>
+
+        <div class="field-label">躯干护甲 <span>优先承伤，耗尽后直接扣血</span></div>
+        <div id="armor-list" class="armor-grid"></div>
+
+        <div class="field-label">行动干员 <span>被动加成 · V 战术技能</span></div>
+        <div id="operator-list" class="operator-grid"></div>
+
+        <div class="field-label">战术消耗品</div>
+        <div class="consumables">
+          <div class="cons-row">
+            <div class="cons-ico med">✚</div><div class="cons-info"><b>医疗针</b><span>按 Q 使用 · 回复 45 生命</span></div>
+            <div class="stepper"><button data-cons="meds" data-dir="-1">−</button><b id="meds-count">1</b><button data-cons="meds" data-dir="1">+</button></div>
+            <em>₡45</em>
+          </div>
+          <div class="cons-row">
+            <div class="cons-ico nade">◉</div><div class="cons-info"><b>破片雷</b><span>按 G 投掷 · 范围杀伤</span></div>
+            <div class="stepper"><button data-cons="nades" data-dir="-1">−</button><b id="nades-count">0</b><button data-cons="nades" data-dir="1">+</button></div>
+            <em>₡80</em>
+          </div>
+        </div>
+
+        <div class="deposit-line">
+          <span>本次装备押金</span><b id="deposit-val">₡45</b>
+          <small>成功撤离全额返还 · 阵亡损失</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel market-panel">
+      <div class="panel-head"><span class="idx">02</span><h2>黑市强化</h2><span class="en">PERMANENT</span></div>
+      <div class="panel-body">
+        <p class="panel-intro">用信用点购买永久强化。强化不会因阵亡丢失，但价格会逐级上涨。</p>
+        <div id="upgrade-list" class="upgrade-list"></div>
+        <div class="market-note">
+          <span class="scan-ico">⌖</span>
+          <p><b>情报提示</b> 中央金库由「典狱长」看守。击破他拿到密钥，金库里的东西够你少跑三趟。</p>
+        </div>
+        <div class="record-grid">
+          <div><span>行动次数</span><b id="st-raids">0</b></div>
+          <div><span>成功撤离</span><b id="st-extracts">0</b></div>
+          <div><span>击杀</span><b id="st-kills">0</b></div>
+          <div><span>单局最高</span><b id="st-best">₡0</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel deploy-panel">
+      <div class="panel-head"><span class="idx">03</span><h2>行动简报</h2><span class="en">DEPLOY</span></div>
+      <div class="panel-body">
+        <div class="map-pick" id="map-pick">
+          <button class="map-card sel" data-map="harbor"><span class="map-thumb harbor"></span><div><b>灰港</b><small>夜雨 · 工业设施</small></div><em>THREAT 4</em></button>
+          <button class="map-card" data-map="desert"><span class="map-thumb desert"></span><div><b>沙脊哨站</b><small>沙暴 · 边境前哨</small></div><em>THREAT 5</em></button>
+        </div>
+        <div class="mission-loc"><span class="ping"></span><div><b id="mission-name">灰港 · 07号联合设施</b><span id="mission-sub">地下二层 / 信号被强干扰</span></div><em id="mission-threat">THREAT 4</em></div>
+        <div class="mission-radar">
+          <div class="mr-grid"></div><div class="mr-ring"></div><div class="mr-sweep"></div>
+          <div class="mr-mark m1">START</div><div class="mr-mark m2">金库</div><div class="mr-mark m3">EXIT</div>
+          <div class="mr-player"></div>
+        </div>
+        <div class="mission-facts">
+          <div><span>行动窗口</span><b>04:00</b></div>
+          <div><span>环境</span><b id="mission-env">酸雨 / 断电</b></div>
+          <div><span>背包容量</span><b id="fact-bag">6 格</b></div>
+          <div><span>战利品嗅觉</span><b id="fact-luck">标准</b></div>
+          <div><span>区域情报</span><b id="mission-loot">标准物资</b></div>
+        </div>
+        <div class="objectives">
+          <b>行动目标</b>
+          <ul><li><i>01</i>搜刮房间内的物资箱</li><li><i>02</i>找到任意撤离点并坚守 4 秒</li><li class="opt"><i>03</i>可选：击破典狱长，开启中央金库</li></ul>
+        </div>
+        <button id="deploy-btn" class="btn btn-primary deploy-btn"><span>开始行动</span><b>→</b></button>
+        <div class="deploy-hint"><span>押金+保险 <b id="deploy-cost">₡45</b></span><span>余额 <b id="deploy-balance">₡650</b></span></div>
+        <label class="insurance-line"><input type="checkbox" id="insurance-toggle"><span>行动保险 <b>₡40</b><em>阵亡返还 50% 押金 + 安全箱首格物资</em></span></label>
+        <p class="tiny-note">提示：撤离点会在地图与罗盘上以 <em>琥珀色</em> 标示。</p>
+      </div>
+    </section>
+  </main>
+  <footer class="hub-footer">
+    <span>BLACKSITE ZERO // 本地存档</span>
+    <span class="hub-keys"><kbd>WASD</kbd> 移动 <kbd>Shift</kbd> 冲刺 <kbd>Ctrl</kbd> 蹲伏 <kbd>Space</kbd> 跳跃 <kbd>左键</kbd> 射击 <kbd>右键</kbd> 机瞄 <kbd>E</kbd> 交互 <kbd>R</kbd> 换弹 <kbd>Q</kbd> 医疗 <kbd>G</kbd> 手雷 <kbd>Esc</kbd> 暂停</span>
+    <button id="reset-btn" class="text-btn">清除存档</button>
+  </footer>
+</section>
+
+<!-- ============ HUD ============ -->
+<div id="hud">
+  <div class="hud-top">
+    <div class="vitals">
+      <div class="vital-label"><span id="operator-tag">OPERATOR // 红狼</span><em id="objective-text">搜寻物资 → 抵达撤离点</em></div>
+      <div class="vital-row"><span>HP</span><div class="bar hp"><i id="hp-bar"></i></div><b id="hp-text">100</b></div>
+      <div class="vital-row"><span>AR</span><div class="bar ar"><i id="ar-bar"></i></div><b id="ar-text">0</b></div>
+      <div class="dash-line"><span>MOVE</span><div class="dash-track"><i id="stance-fill"></i></div><b id="stance-text">作战</b></div>
+    </div>
+    <div class="timer-block">
+      <span>情报窗口 / SIGNAL WINDOW</span>
+      <b id="raid-timer">04:00</b>
+      <div class="timer-line"><i id="timer-bar"></i></div>
+      <em id="phase-label">撤离通道已上线</em>
+      <canvas id="compass" width="360" height="30"></canvas>
+    </div>
+    <div class="minimap-wrap">
+      <div class="mini-head"><span id="mini-title">07号设施</span><em id="mini-dist">EXIT --</em></div>
+      <canvas id="minimap" width="200" height="200"></canvas>
+      <div class="mini-legend"><span class="lg-player">你</span><span class="lg-loot">物资</span><span class="lg-exit">撤离</span></div>
+    </div>
+  </div>
+
+  <div class="boss-bar" id="boss-bar">
+    <div class="boss-head"><span>目标 // WARDEN</span><b>典狱长 · 铁幕</b><em id="boss-hp-text">520 / 520</em></div>
+    <div class="boss-track"><i id="boss-hp"></i></div>
+  </div>
+
+  <div class="toasts" id="toasts"></div>
+  <div class="killfeed" id="killfeed"></div>
+  <div class="low-health" id="low-health"></div>
+  <div class="announce" id="announce"><span id="announce-kicker">PRIORITY</span><b id="announce-text"></b></div>
+  <div class="extract-edge" id="extract-edge"><span class="arrow">▲</span><b id="extract-edge-text">撤离点</b><em id="extract-edge-dist">120m</em></div>
+
+  <div class="crosshair-info" id="crosshair-info"></div>
+
+  <div class="squad-hud" id="squad-hud"><div class="squad-title">SQUAD // 小队</div><div id="squad-list"></div></div>
+  <div class="skill-hud" id="skill-hud"><div class="skill-key">V</div><div class="skill-info"><b id="skill-name">过载冲刺</b><span id="skill-cd">就绪</span></div><div class="skill-track"><i id="skill-bar"></i></div></div>
+
+  <div class="hud-bottom">
+    <div class="weapon-card">
+      <div class="wc-top"><span id="weapon-class">半自动手枪</span><em id="weapon-mode">SEMI</em></div>
+      <div class="wc-name" id="weapon-name">P9 侧卫</div>
+      <div class="wc-ammo"><b id="ammo-mag">12</b><span>/</span><em id="ammo-reserve">72</em></div>
+      <div class="reload-bar"><i id="reload-fill"></i></div>
+      <div class="wc-keys">
+        <div class="slot-key" id="med-slot"><kbd>Q</kbd><span>医疗针</span><b id="med-hud">1</b></div>
+        <div class="slot-key" id="nade-slot"><kbd>G</kbd><span>破片雷</span><b id="nade-hud">0</b></div>
+      </div>
+    </div>
+
+    <div class="interact" id="interact">
+      <div class="interact-key"><kbd>E</kbd></div>
+      <div class="interact-body"><b id="interact-label">搜刮物资箱</b><span id="interact-sub">按住进行搜刮</span><div class="interact-track"><i id="interact-fill"></i></div></div>
+    </div>
+
+    <div class="bag-panel">
+      <div class="bag-head"><span>战术背包 <em id="bag-count">0/6</em></span><b>₡<span id="bag-value">0</span></b></div>
+      <div class="bag-slots" id="bag-slots"></div>
+      <div class="bag-hint"><kbd>X</kbd> 丢弃最低价值物品</div>
+    </div>
+  </div>
+
+  <div class="hud-bottomline">
+    <span>WASD 移动</span><span>Shift 冲刺</span><span>Ctrl 蹲伏</span><span>左键 射击</span><span>右键 机瞄</span><span>F 检视</span><span>V 战术技能</span><span>R 换弹</span><span>E 搜刮 / 撤离</span>
+  </div>
+</div>
+
+<!-- ============ RESULT ============ -->
+<section id="screen-result" class="screen result-screen">
+  <div class="result-card">
+    <div class="result-stripe"></div>
+    <div class="result-head"><div class="result-stamp" id="result-stamp">EXFIL</div>
+      <div class="result-kicker" id="result-kicker">RAID COMPLETE</div>
+      <h2 id="result-title">撤离成功</h2>
+      <p id="result-sub">信号已回收。你活着出来了。</p>
+    </div>
+    <div class="result-main">
+      <div class="result-value"><span>带出物资估值</span><b>₡<em id="result-value">0</em></b><small id="result-bonus">装备押金已返还</small></div>
+      <div class="result-stats">
+        <div><span>击杀</span><b id="result-kills">0</b></div>
+        <div><span>命中率</span><b id="result-acc">0%</b></div>
+        <div><span>用时</span><b id="result-time">00:00</b></div>
+        <div><span>搜刮</span><b id="result-loot">0</b></div>
+      </div>
+    </div>
+    <div class="result-loot"><div class="result-loot-head"><span>回收清单</span><em id="result-newbest"></em></div><div id="result-list" class="result-list"></div></div>
+    <div class="result-actions">
+      <button id="result-again" class="btn btn-primary"><span>再次部署</span><b>→</b></button>
+      <button id="result-hub" class="btn btn-ghost">返回整备</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAUSE ============ -->
+<div id="pause" class="modal-layer">
+  <div class="pause-card">
+    <div class="panel-head"><span class="idx">II</span><h2>行动暂停</h2><span class="en">PAUSED</span></div>
+    <div class="pause-body">
+      <div class="pause-fact"><span>流逝时间</span><b id="pause-time">00:00</b></div>
+      <div class="pause-fact"><span>当前估值</span><b id="pause-value">₡0</b></div>
+      <p>暂停期间行动窗口停止。放弃行动将视为阵亡，损失装备押金与全部战利品。</p>
+      <button id="resume-btn" class="btn btn-primary"><span>继续行动</span><b>→</b></button>
+      <button id="abandon-btn" class="btn btn-danger">放弃行动</button>
+      <button id="pause-help-btn" class="btn btn-ghost">操作说明</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HELP ============ -->
+<div id="help" class="modal-layer">
+  <div class="help-card">
+    <button class="modal-close" id="help-close">×</button>
+    <div class="panel-head"><span class="idx">?</span><h2>行动手册</h2><span class="en">FIELD MANUAL</span></div>
+    <div class="help-grid">
+      <div class="help-block"><b>移动与战斗</b>
+        <div><kbd>W A S D</kbd><span>移动</span></div><div><kbd>鼠标</kbd><span>瞄准</span></div>
+        <div><kbd>左键</kbd><span>射击</span></div><div><kbd>右键</kbd><span>机瞄，降低散布与移速</span></div>
+        <div><kbd>Shift</kbd><span>冲刺</span></div><div><kbd>Ctrl / Space</kbd><span>蹲伏 / 跳跃</span></div><div><kbd>R</kbd><span>换弹</span></div>
+      </div>
+      <div class="help-block"><b>搜刮与撤离</b>
+        <div><kbd>E</kbd><span>按住搜刮物资 / 呼叫撤离</span></div><div><kbd>X</kbd><span>丢弃背包中最低价值物品</span></div>
+        <div><kbd>Q</kbd><span>使用医疗针</span></div><div><kbd>G</kbd><span>投掷破片雷</span></div>
+        <div><kbd>Esc</kbd><span>暂停</span></div><div><kbd>M</kbd><span>静音 / 恢复音效</span></div>
+      </div>
+      <div class="help-block wide"><b>行动规则</b>
+        <p>· 在 <em>04:00</em> 内抵达直升机撤离点，按住 E 坚守 4 秒即可带出背包里的一切。</p>
+        <p>· 阵亡或超时 = 失去本局全部战利品与装备押金。成功撤离则押金全额返还。</p>
+        <p>· <em>安全箱</em>：背包第 1 格为保险位，阵亡后仍会回收该格物资；可在整备界面购买「行动保险」，阵亡返还 50% 押金。</p>
+        <p>· <em>大金</em>：金库与Boss遗物中可能开出「曼德尔砖 / 金条」，价值极高。</p>
+        <p>· 稀有度：<span class="r-common">普通</span> → <span class="r-rare">稀有</span> → <span class="r-epic">史诗</span> → <span class="r-legend">传说</span>。颜色越亮，越值钱。</p>
+        <p>· 中央金库位于仓库后方，需要「典狱长密钥」。典狱长在仓库区域巡逻，击杀后掉落。</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="help-ok"><span>收到</span><b>→</b></button>
+  </div>
+</div>
+
+<div id="crosshair"><i class="ch-t"></i><i class="ch-r"></i><i class="ch-b"></i><i class="ch-l"></i><span></span></div>
+<div id="hitmarker"></div>
+<div id="floaters"></div>
+<div id="lock-overlay"><div class="lock-card"><span>07号联合设施 / 第一人称</span><b>点击进入行动</b><p>鼠标锁定后开始 · Esc 暂停并释放鼠标</p></div></div>
+<div id="gunsmith" class="modal-layer">
+  <div class="gs-card">
+    <button class="modal-close" id="gs-close">×</button>
+    <div class="panel-head"><span class="idx">G</span><h2>枪械改装</h2><span class="en">GUNSMITH</span></div>
+    <div class="gs-body">
+      <div class="gs-left">
+        <div class="field-label">选择武器</div>
+        <div id="gs-weapons" class="gs-weapons"></div>
+        <div id="gs-preview" class="gs-preview"></div>
+        <div id="gs-stats" class="gs-stats"></div>
+      </div>
+      <div class="gs-right">
+        <div id="gs-slots" class="gs-slots"></div>
+        <div id="gs-options" class="gs-options"></div>
+      </div>
+    </div>
+    <div class="gs-foot"><span>可用信用点 <b id="gs-credits">0</b></span><em>改装永久保存 · 行动中生效</em><button class="btn btn-ghost" id="gs-done">完成</button></div>
+  </div>
+</div>
+<div id="loading"><span>BUILDING SECTOR</span><b>正在生成 3D 港区</b><i></i></div>
+<div id="wipe"><div class="wipe-inner"><span>INFILTRATION</span><b>正在接入设施信号</b><i></i></div></div>
+<div id="start-banner"><div class="banner-num">OP-07</div><span>07号联合设施 / 地下二层</span><b>行动开始</b><em>在信号窗口关闭前带出战利品</em></div>
+
+<script src="three.min.js"></script>
+<script src="GLTFLoader.js"></script>
+<script src="RoundedBoxGeometry.js"></script>
+<script src="SkeletonUtils.js"></script>
+<script src="data.js"></script>
+<script src="gunsmith.js"></script>
+<script src="modeldata.js"></script>
+<script src="gundata.js"></script>
+<script src="texturedata.js"></script>
+<script src="map3d.js"></script>
+<script src="map3d_desert.js"></script>
+<script src="game3d.js"></script>
+</body>
+</html>
