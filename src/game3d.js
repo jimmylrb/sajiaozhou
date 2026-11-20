@@ -199,12 +199,18 @@ function syncMeta() {
     ? `本地存档 // 信用点 <b>₡${fmt(save.credits)}</b> · 累计带出 <b>₡${fmt(save.stash)}</b>`
     : '本地存档 // 尚无行动记录';
 }
+function silhouetteKey(type) {
+  if (type === 'pistol' || type === 'pistol2') return 'pistol';
+  if (type === 'smg' || type === 'smg2') return 'smg';
+  if (type === 'shotgun') return 'shotgun';
+  return 'rifle';
+}
 function renderLoadout() {
   $('#weapon-list').innerHTML = Object.entries(WEAPONS).map(([k, w]) => {
     const sel = save.loadout.weapon === k;
     return `<button class="weapon-card ${sel ? 'sel' : ''}" data-weapon="${k}">
       <span class="wcost">${w.deposit ? '₡' + w.deposit : 'FREE'}</span>
-      <div class="wc-svg">${w.icon}</div>
+      <div class="wc-svg"><img class="wc-img" src="Assets/RetroWeaponsPack/Silhouettes/${silhouetteKey(k)}.png" alt=""></div>
       <div class="wname">${w.name}<em>${w.mode}</em></div>
       <div class="wstats"><span>DMG <b>${w.dmg}</b></span><span>RPM <b>${w.rpm}</b></span><span>MAG <b>${w.mag}</b></span></div>
     </button>`;
@@ -711,6 +717,10 @@ function buildGunModel(type) {
   if (muzzleNode) muzzleNode.add(muzzle); else { muzzle.position.set(0, .01, -desired / 2); g.add(muzzle); }
   const flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('#ffe3a3'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false }));
   flash.scale.set(.14, .14, 1); flash.visible = false; muzzle.add(flash);
+  new THREE.TextureLoader().load('Assets/RetroWeaponsPack/FX/MuzzleFlash.png', t => {
+    t.encoding = THREE.sRGBEncoding;
+    flash.material.map = t; flash.material.needsUpdate = true;
+  });
   const light = new THREE.PointLight(0xffb45c, 0, 1.6); muzzle.add(light);
   const scope = model.getObjectByName('Attach_Scope');
   if (scope && (type === 'rifle' || type === 'smg')) {
@@ -2317,37 +2327,8 @@ function gsBar(label, value, ratio, suffix = '') {
 }
 function drawGunBlueprint(type, stats) {
   const host = D.gsPreview; if (!host) return;
-  host.innerHTML = '<canvas width="300" height="132"></canvas>';
-  const c = host.querySelector('canvas').getContext('2d');
-  c.clearRect(0, 0, 300, 132);
-  c.strokeStyle = 'rgba(157,190,184,.09)'; c.lineWidth = 1;
-  for (let x = 0; x < 300; x += 20) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 132); c.stroke(); }
-  for (let y = 0; y < 132; y += 20) { c.beginPath(); c.moveTo(0, y); c.lineTo(300, y); c.stroke(); }
-  const accent = '#c8ff4f'; const dim = 'rgba(200,220,210,.42)';
-  c.save(); c.translate(150, 68);
-  const long = type !== 'pistol';
-  const L = long ? 100 : 58;
-  c.strokeStyle = dim; c.lineWidth = 2;
-  // barrel
-  c.beginPath(); c.moveTo(-L * .55, -4); c.lineTo(L * .62, -4); c.stroke();
-  // body
-  c.strokeStyle = accent; c.lineWidth = 3;
-  c.strokeRect(-L * .38, -14, L * .52, 22);
-  // stock
-  c.strokeStyle = dim; c.lineWidth = 2; c.strokeRect(L * .14, -11, L * .22, 16);
-  // grip
-  c.beginPath(); c.moveTo(-L * .12, 8); c.lineTo(-L * .22, 34); c.lineTo(-L * .07, 34); c.lineTo(0, 8); c.closePath(); c.stroke();
-  // magazine
-  c.beginPath(); c.moveTo(-L * .02, 8); c.lineTo(-L * .06, 30); c.lineTo(L * .08, 30); c.lineTo(L * .1, 8); c.closePath(); c.stroke();
-  // optic
-  if (stats.visuals.optic !== 'iron') {
-    c.fillStyle = accent; c.fillRect(-L * .12, -23, 26, 8);
-    c.strokeStyle = 'rgba(103,232,255,.8)'; c.strokeRect(-L * .1, -26, 22, 4);
-  }
-  // muzzle
-  if (stats.visuals.muzzle === 'suppressor') { c.fillStyle = dim; c.fillRect(L * .58, -8, 22, 9); }
-  c.fillStyle = 'rgba(200,220,210,.55)'; c.font = '7px monospace'; c.fillText('07 // GUNSMITH', -145, 56);
-  c.restore();
+  const key = silhouetteKey(type);
+  host.innerHTML = `<img class="gs-gun-img" src="Assets/RetroWeaponsPack/Silhouettes/${key}.png" alt=""><div class="gs-gun-scan"></div><span class="gs-gun-caption">07 // ${key.toUpperCase()} // LIVE MOD</span>`;
 }
 function renderGunsmith() {
   if (!D.gs) return;

@@ -596,3 +596,10 @@ canvas#game{filter:contrast(1.04) saturate(1.06)}
 .result-item.big:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,215,150,.22),transparent 70%);animation:goldSweep 2.4s infinite}
 @keyframes goldSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 @media(max-width:760px){.title-side,.cinema{display:none}.killfeed{top:250px;right:12px}.banner-num{display:none}}
+.wc-img{width:80px;height:28px;object-fit:contain;opacity:.5;filter:drop-shadow(0 0 5px rgba(200,255,79,.08))}
+.weapon-card.sel .wc-img{opacity:.95;filter:drop-shadow(0 0 8px rgba(200,255,79,.25))}
+.gs-preview img.gs-gun-img{position:absolute;inset:8% 4%;width:92%;height:84%;object-fit:contain;opacity:.62;filter:drop-shadow(0 0 14px rgba(200,255,79,.16));z-index:1}
+.gs-preview .gs-gun-scan{position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--acid),transparent);animation:scanY 4s linear infinite;z-index:2;opacity:.5}
+@keyframes scanY{from{top:6%}to{top:94%}}
+.gs-gun-caption{position:absolute;left:8px;bottom:6px;z-index:3;font:6px var(--mono);letter-spacing:.14em;color:rgba(200,255,79,.5)}
+.gs-preview:after{content:"" !important;display:none !important}
